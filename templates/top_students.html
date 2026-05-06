@@ -1,25 +1,18 @@
-<!-- templates/top_students.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Students</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<div class="container">
-    <h1>Top 3 Students</h1>
-    <table>
-        <tr><th>Name</th><th>Total Score</th></tr>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a class="btn" href="/">Back Home</a>
-</div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Top Students</h2>
+
+<table>
+<tr><th>Name</th><th>Total Score</th></tr>
+
+{% for r in rows %}
+<tr>
+    <td>{{r[0]}}</td>
+    <td>{{r[1]}}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}

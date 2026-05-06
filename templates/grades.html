@@ -1,26 +1,19 @@
-<!-- templates/grades.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade Report</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<div class="container">
-    <h1>Grade Report</h1>
-    <table>
-        <tr><th>Name</th><th>Average Score</th><th>Grade</th></tr>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a class="btn" href="/">Back Home</a>
-</div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Grades</h2>
+
+<table>
+<tr><th>Name</th><th>Average</th><th>Grade</th></tr>
+
+{% for r in rows %}
+<tr>
+    <td>{{r[0]}}</td>
+    <td>{{r[1]}}</td>
+    <td>{{r[2]}}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}

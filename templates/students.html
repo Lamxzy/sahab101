@@ -1,33 +1,26 @@
-<!-- templates/students.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-<div class="container">
-    <h1>Students</h1>
-    <table>
-        <tr>
-            <th>ID</th><th>Name</th><th>Department</th><th>Level</th><th>Actions</th>
-        </tr>
-        {% for student in students %}
-        <tr>
-            <td>{{ student[0] }}</td>
-            <td>{{ student[1] }}</td>
-            <td>{{ student[2] }}</td>
-            <td>{{ student[3] }}</td>
-            <td>
-                <a class="btn small" href="/update_student/{{ student[0] }}">Edit</a>
-                <a class="btn small danger" href="/delete_student/{{ student[0] }}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a class="btn" href="/">Back Home</a>
-</div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Results</h2>
+
+<table>
+<tr><th>Name</th><th>Course</th><th>Score</th></tr>
+
+{% for r in results %}
+<tr>
+    <td>{{r[0]}}</td>
+    <td>{{r[1]}}</td>
+    <td>{{r[2]}}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<form method="POST" action="/add_course">
+    <input name="student_id" placeholder="Student ID">
+    <input name="course_name" placeholder="Course">
+    <input name="score" placeholder="Score">
+    <button>Add Course</button>
+</form>
+
+{% endblock %}
