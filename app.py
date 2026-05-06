@@ -1,13 +1,11 @@
 # app.py
-from flask import Flask, render_template, request, redirect
+import os
 import psycopg2
+from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
 # ---------------- DATABASE CONNECTION ---------------- #
-import os
-import psycopg2
-
 def connect():
     return psycopg2.connect(os.environ["DATABASE_URL"])
 
@@ -27,11 +25,14 @@ def add_student():
 
     conn = connect()
     cur = conn.cursor()
+
     cur.execute(
         "INSERT INTO students (name, department, level) VALUES (%s, %s, %s)",
         (name, department, level)
     )
+
     conn.commit()
+    cur.close()
     conn.close()
 
     return redirect("/students")
@@ -41,8 +42,11 @@ def add_student():
 def view_students():
     conn = connect()
     cur = conn.cursor()
+
     cur.execute("SELECT * FROM students ORDER BY student_id")
     rows = cur.fetchall()
+
+    cur.close()
     conn.close()
 
     return render_template("students.html", students=rows)
@@ -65,11 +69,14 @@ def update_student(student_id):
         """, (new_name, new_department, new_level, student_id))
 
         conn.commit()
+        cur.close()
         conn.close()
         return redirect("/students")
 
     cur.execute("SELECT * FROM students WHERE student_id = %s", (student_id,))
     student = cur.fetchone()
+
+    cur.close()
     conn.close()
 
     return render_template("update_student.html", student=student)
@@ -84,6 +91,7 @@ def delete_student(student_id):
     cur.execute("DELETE FROM students WHERE student_id = %s", (student_id,))
 
     conn.commit()
+    cur.close()
     conn.close()
 
     return redirect("/students")
@@ -98,11 +106,14 @@ def add_course():
 
     conn = connect()
     cur = conn.cursor()
+
     cur.execute(
         "INSERT INTO courses (student_id, course_name, score) VALUES (%s, %s, %s)",
         (student_id, course_name, score)
     )
+
     conn.commit()
+    cur.close()
     conn.close()
 
     return redirect("/results")
@@ -125,6 +136,8 @@ def view_results():
     """)
 
     rows = cur.fetchall()
+
+    cur.close()
     conn.close()
 
     return render_template("results.html", results=rows)
@@ -150,6 +163,8 @@ def performance_report():
     """)
 
     rows = cur.fetchall()
+
+    cur.close()
     conn.close()
 
     return render_template("performance.html", rows=rows)
@@ -173,6 +188,8 @@ def top_students():
     """)
 
     rows = cur.fetchall()
+
+    cur.close()
     conn.close()
 
     return render_template("top_students.html", rows=rows)
@@ -207,10 +224,16 @@ def grade_report():
     """)
 
     rows = cur.fetchall()
+
+    cur.close()
     conn.close()
 
     return render_template("grades.html", rows=rows)
 
 
+# ---------------- RUN APP ---------------- #
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
