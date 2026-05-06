@@ -5,14 +5,11 @@ import psycopg2
 app = Flask(__name__)
 
 # ---------------- DATABASE CONNECTION ---------------- #
+import os
+import psycopg2
+
 def connect():
-    return psycopg2.connect(
-        database="siwes_db",
-        user="postgres",
-        password="@Lam1200",
-        host="localhost",
-        port="5434"
-    )
+    return psycopg2.connect(os.environ["DATABASE_URL"])
 
 
 # ---------------- HOME ---------------- #
