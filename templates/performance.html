@@ -1,0 +1,27 @@
+<!-- templates/performance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Performance Report</h1>
+    <table>
+        <tr><th>Name</th><th>Total Score</th><th>Average</th><th>Rank</th></tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a class="btn" href="/">Back Home</a>
+</div>
+</body>
+</html>

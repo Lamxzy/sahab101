@@ -1,0 +1,93 @@
+/* static/style.css */
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 85%;
+    margin: 30px auto;
+    text-align: center;
+}
+
+h1 {
+    color: #1f4e79;
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    width: 420px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+input {
+    display: block;
+    width: 92%;
+    padding: 12px;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+button, .btn {
+    background: #1f4e79;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 6px;
+}
+
+button:hover, .btn:hover {
+    background: #163a5c;
+}
+
+.btn.small {
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.btn.danger {
+    background: #c0392b;
+}
+
+.btn.danger:hover {
+    background: #922b21;
+}
+
+.links {
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    margin-top: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background: #1f4e79;
+    color: white;
+}
