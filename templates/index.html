@@ -1,13 +1,42 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>SIWES SYSTEM</h1>
+<h1>SIWES MANAGEMENT DASHBOARD</h1>
+
+<div class="dashboard">
+
+    <div class="dashboard-card">
+        <h3>Students</h3>
+        <p>Manage Records</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Results</h3>
+        <p>Track Scores</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Performance</h3>
+        <p>View Rankings</p>
+    </div>
+
+    <div class="dashboard-card">
+        <h3>Grades</h3>
+        <p>Automatic Reports</p>
+    </div>
+
+</div>
 
 <form method="POST" action="/add_student">
-    <input name="name" placeholder="Name" required>
+
+    <input name="name" placeholder="Student Name" required>
+
     <input name="department" placeholder="Department" required>
+
     <input name="level" placeholder="Level" required>
+
     <button type="submit">Add Student</button>
+
 </form>
 
 {% endblock %}

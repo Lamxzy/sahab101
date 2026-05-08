@@ -1,26 +1,32 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Results</h2>
+<h2>Students List</h2>
 
 <table>
-<tr><th>Name</th><th>Course</th><th>Score</th></tr>
 
-{% for r in results %}
 <tr>
-    <td>{{r[0]}}</td>
-    <td>{{r[1]}}</td>
-    <td>{{r[2]}}</td>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Department</th>
+    <th>Level</th>
+    <th>Actions</th>
+</tr>
+
+{% for s in students %}
+<tr>
+    <td>{{s[0]}}</td>
+    <td>{{s[1]}}</td>
+    <td>{{s[2]}}</td>
+    <td>{{s[3]}}</td>
+
+    <td class="action-links">
+        <a href="/delete_student/{{s[0]}}">Delete</a>
+        <a href="/update_student/{{s[0]}}">Edit</a>
+    </td>
 </tr>
 {% endfor %}
 
 </table>
-
-<form method="POST" action="/add_course">
-    <input name="student_id" placeholder="Student ID">
-    <input name="course_name" placeholder="Course">
-    <input name="score" placeholder="Score">
-    <button>Add Course</button>
-</form>
 
 {% endblock %}

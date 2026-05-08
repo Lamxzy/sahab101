@@ -6,11 +6,7 @@ app = Flask(__name__)
 
 # ================= DATABASE ================= #
 def connect():
-    return psycopg2.connect(
-        os.environ["DATABASE_URL"].strip(),
-        sslmode="require"
-    )
-
+    return psycopg2.connect(os.environ["DATABASE_URL"], sslmode="require")
 
 # ================= HOME ================= #
 @app.route("/")
