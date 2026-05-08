@@ -160,3 +160,28 @@ button:hover{
         font-size:14px;
     }
 }
+
+
+.dashboard-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+    text-align:center;
+    transition:0.3s;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-5px);
+}
+
+.dashboard-card p{
+    font-size:26px;
+    font-weight:bold;
+    color:#1e3a8a;
+}
+
+.nav{
+    position:sticky;
+    top:0;
+}

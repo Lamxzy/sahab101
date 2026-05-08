@@ -46,6 +46,22 @@ def add_student():
 
     return redirect(url_for("students"))
 
+@app.route("/search")
+def search():
+    q = request.args.get("q")
+
+    conn = connect()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT * FROM students
+        WHERE name ILIKE %s
+    """, ('%' + q + '%',))
+
+    results = cur.fetchall()
+    conn.close()
+
+    return render_template("students.html", students=results)
 
 @app.route("/delete_student/<int:student_id>")
 def delete_student(student_id):
@@ -160,6 +176,41 @@ def performance():
     conn.close()
 
     return render_template("performance.html", rows=data)
+
+
+@app.route("/dashboard")
+def dashboard():
+    conn = connect()
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM students")
+    total_students = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM courses")
+    total_courses = cur.fetchone()[0]
+
+    cur.execute("SELECT AVG(score) FROM courses")
+    avg_score = cur.fetchone()[0] or 0
+
+    cur.execute("""
+        SELECT s.name, SUM(c.score) as total
+        FROM students s
+        JOIN courses c ON s.student_id = c.student_id
+        GROUP BY s.name
+        ORDER BY total DESC
+        LIMIT 1
+    """)
+    top = cur.fetchone()
+
+    conn.close()
+
+    return render_template(
+        "dashboard.html",
+        total_students=total_students,
+        total_courses=total_courses,
+        avg_score=round(avg_score, 2),
+        top_student=top
+    )
 
 
 # ================= TOP STUDENTS ================= #
