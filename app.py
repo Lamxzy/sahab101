@@ -1,275 +1,119 @@
 import os
 import psycopg2
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "siwes_portal_key"
 
-# ================= DATABASE ================= #
-def connect():
+def db():
     return psycopg2.connect(os.environ["DATABASE_URL"], sslmode="require")
 
-# ================= HOME ================= #
+# HOME
 @app.route("/")
 def home():
-    return render_template("index.html")
+    if "user" in session:
+        return render_template("dashboard.html", user=session["user"])
+    return render_template("home.html")
 
+# REGISTER
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        password = generate_password_hash(request.form["password"])
 
-# ================= STUDENTS ================= #
+        conn = db()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users(name,email,password) VALUES(%s,%s,%s)",
+                    (name,email,password))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+# LOGIN
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        conn = db()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE email=%s", (email,))
+        user = cur.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user[3], password):
+            session["user"] = user[1]
+            session["id"] = user[0]
+            return redirect(url_for("home"))
+
+    return render_template("login.html")
+
+# LOGOUT
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+# STUDENTS
 @app.route("/students")
 def students():
-    conn = connect()
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    conn = db()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM students ORDER BY student_id")
+    cur.execute("SELECT * FROM students ORDER BY id")
     data = cur.fetchall()
-    cur.close()
     conn.close()
     return render_template("students.html", students=data)
 
-
 @app.route("/add_student", methods=["POST"])
 def add_student():
-    name = request.form["name"]
-    department = request.form["department"]
-    level = request.form["level"]
-
-    conn = connect()
+    conn = db()
     cur = conn.cursor()
-
-    cur.execute(
-        "INSERT INTO students (name, department, level) VALUES (%s, %s, %s)",
-        (name, department, level)
-    )
-
+    cur.execute("INSERT INTO students(name,department,level) VALUES(%s,%s,%s)",
+                (request.form["name"], request.form["department"], request.form["level"]))
     conn.commit()
-    cur.close()
     conn.close()
-
     return redirect(url_for("students"))
 
-@app.route("/search")
-def search():
-    q = request.args.get("q")
-
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT * FROM students
-        WHERE name ILIKE %s
-    """, ('%' + q + '%',))
-
-    results = cur.fetchall()
-    conn.close()
-
-    return render_template("students.html", students=results)
-
-@app.route("/delete_student/<int:student_id>")
-def delete_student(student_id):
-    conn = connect()
-    cur = conn.cursor()
-
-    # FIX: remove child records first
-    cur.execute("DELETE FROM courses WHERE student_id = %s", (student_id,))
-    cur.execute("DELETE FROM students WHERE student_id = %s", (student_id,))
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return redirect(url_for("students"))
-
-
-@app.route("/update_student/<int:student_id>", methods=["GET", "POST"])
-def update_student(student_id):
-    conn = connect()
-    cur = conn.cursor()
-
-    if request.method == "POST":
-        name = request.form["name"]
-        department = request.form["department"]
-        level = request.form["level"]
-
-        cur.execute("""
-            UPDATE students
-            SET name=%s, department=%s, level=%s
-            WHERE student_id=%s
-        """, (name, department, level, student_id))
-
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        return redirect(url_for("students"))
-
-    cur.execute("SELECT * FROM students WHERE student_id=%s", (student_id,))
-    student = cur.fetchone()
-
-    cur.close()
-    conn.close()
-
-    return render_template("update_student.html", student=student)
-
-
-# ================= COURSES ================= #
-@app.route("/add_course", methods=["POST"])
-def add_course():
-    student_id = request.form["student_id"]
-    course_name = request.form["course_name"]
-    score = request.form["score"]
-
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute(
-        "INSERT INTO courses (student_id, course_name, score) VALUES (%s, %s, %s)",
-        (student_id, course_name, score)
-    )
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return redirect(url_for("results"))
-
-
+# RESULTS
 @app.route("/results")
 def results():
-    conn = connect()
+    conn = db()
     cur = conn.cursor()
-
     cur.execute("""
-        SELECT s.name, c.course_name, c.score
+        SELECT s.name, c.course, c.score
         FROM students s
-        JOIN courses c ON s.student_id = c.student_id
-        ORDER BY s.name
+        JOIN courses c ON s.id = c.student_id
     """)
-
     data = cur.fetchall()
-
-    cur.close()
     conn.close()
+    return render_template("results.html", data=data)
 
-    return render_template("results.html", results=data)
-
-
-# ================= PERFORMANCE ================= #
+# PERFORMANCE
 @app.route("/performance")
 def performance():
-    conn = connect()
+    conn = db()
     cur = conn.cursor()
-
     cur.execute("""
-        SELECT 
-            s.name,
-            SUM(c.score) AS total,
-            AVG(c.score) AS avg,
-            RANK() OVER (ORDER BY SUM(c.score) DESC) AS rank
+        SELECT s.name,
+               SUM(c.score),
+               AVG(c.score)
         FROM students s
-        JOIN courses c ON s.student_id = c.student_id
-        GROUP BY s.student_id
-        ORDER BY rank
+        JOIN courses c ON s.id = c.student_id
+        GROUP BY s.id
+        ORDER BY SUM(c.score) DESC
     """)
-
     data = cur.fetchall()
-
-    cur.close()
     conn.close()
+    return render_template("performance.html", data=data)
 
-    return render_template("performance.html", rows=data)
-
-
-@app.route("/dashboard")
-def dashboard():
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute("SELECT COUNT(*) FROM students")
-    total_students = cur.fetchone()[0]
-
-    cur.execute("SELECT COUNT(*) FROM courses")
-    total_courses = cur.fetchone()[0]
-
-    cur.execute("SELECT AVG(score) FROM courses")
-    avg_score = cur.fetchone()[0] or 0
-
-    cur.execute("""
-        SELECT s.name, SUM(c.score) as total
-        FROM students s
-        JOIN courses c ON s.student_id = c.student_id
-        GROUP BY s.name
-        ORDER BY total DESC
-        LIMIT 1
-    """)
-    top = cur.fetchone()
-
-    conn.close()
-
-    return render_template(
-        "dashboard.html",
-        total_students=total_students,
-        total_courses=total_courses,
-        avg_score=round(avg_score, 2),
-        top_student=top
-    )
-
-
-# ================= TOP STUDENTS ================= #
-@app.route("/top")
-def top():
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT s.name, SUM(c.score) AS total
-        FROM students s
-        JOIN courses c ON s.student_id = c.student_id
-        GROUP BY s.student_id
-        ORDER BY total DESC
-        LIMIT 3
-    """)
-
-    data = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return render_template("top_students.html", rows=data)
-
-
-# ================= GRADES ================= #
-@app.route("/grades")
-def grades():
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute("""
-        WITH avg_table AS (
-            SELECT s.name, AVG(c.score) AS avg_score
-            FROM students s
-            JOIN courses c ON s.student_id = c.student_id
-            GROUP BY s.student_id
-        )
-        SELECT 
-            name,
-            avg_score,
-            CASE
-                WHEN avg_score >= 90 THEN 'A'
-                WHEN avg_score >= 80 THEN 'B'
-                WHEN avg_score >= 70 THEN 'C'
-                ELSE 'F'
-            END AS grade
-        FROM avg_table
-        ORDER BY avg_score DESC
-    """)
-
-    data = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return render_template("grades.html", rows=data)
-
-
-# ================= RUN ================= #
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)

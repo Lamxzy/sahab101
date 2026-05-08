@@ -1,20 +1,13 @@
-{% extends 'base.html' %}
-{% block content %}
-
 <h2>Performance</h2>
 
 <table>
-<tr><th>Name</th><th>Total</th><th>Average</th><th>Rank</th></tr>
+<tr><th>Name</th><th>Total</th><th>Average</th></tr>
 
-{% for r in rows %}
+{% for r in data %}
 <tr>
-    <td>{{r[0]}}</td>
-    <td>{{r[1]}}</td>
-    <td>{{r[2]}}</td>
-    <td>{{r[3]}}</td>
+<td>{{r[0]}}</td>
+<td>{{r[1]}}</td>
+<td>{{r[2]}}</td>
 </tr>
 {% endfor %}
-
 </table>
-
-{% endblock %}

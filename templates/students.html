@@ -1,35 +1,21 @@
-{% extends 'base.html' %}
-{% block content %}
+<h2>Students</h2>
 
-<h2>Students List</h2>
-<form action="/search" method="GET">
-    <input type="text" name="q" placeholder="Search student...">
-    <button type="submit">Search</button>
+<form method="POST" action="/add_student">
+<input name="name" placeholder="Name">
+<input name="department" placeholder="Department">
+<input name="level" placeholder="Level">
+<button>Add Student</button>
 </form>
-<table>
 
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Department</th>
-    <th>Level</th>
-    <th>Actions</th>
-</tr>
+<table>
+<tr><th>ID</th><th>Name</th><th>Dept</th><th>Level</th></tr>
 
 {% for s in students %}
 <tr>
-    <td>{{s[0]}}</td>
-    <td>{{s[1]}}</td>
-    <td>{{s[2]}}</td>
-    <td>{{s[3]}}</td>
-
-    <td class="action-links">
-        <a href="/delete_student/{{s[0]}}">Delete</a>
-        <a href="/update_student/{{s[0]}}">Edit</a>
-    </td>
+<td>{{s[0]}}</td>
+<td>{{s[1]}}</td>
+<td>{{s[2]}}</td>
+<td>{{s[3]}}</td>
 </tr>
 {% endfor %}
-
 </table>
-
-{% endblock %}
